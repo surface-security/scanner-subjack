@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"subjack/autotakeover"
 
 	"github.com/fopina/subjack/subjack"
 )
@@ -18,8 +19,12 @@ func main() {
 
 	// store results in a temporary file and move to final destination upon completion
 	// otherwise Surface file sync will import (and delete) the file in chunks...
-	var finalOutput string
-	var hideNotVulnerable bool
+	var (
+		finalOutput       string
+		gToken            string
+		hideNotVulnerable bool
+		autoTakeover      bool
+	)
 
 	flag.IntVar(&o.Threads, "t", 10, "Number of concurrent threads (Default: 10).")
 	flag.IntVar(&o.Timeout, "timeout", 10, "Seconds to wait before connection timeout (Default: 10).")
@@ -33,6 +38,7 @@ func main() {
 	flag.BoolVar(&o.Manual, "m", false, "Flag the presence of a dead record, but valid CNAME entry.")
 	flag.BoolVar(&o.IncludeEdge, "e", false, "Include edge takeover cases.")
 	flag.BoolVar(&o.Follow, "follow", false, "Follow redirects.")
+	flag.BoolVar(&autoTakeover, "autotakeover", false, "Allow scanner to automatically try to takeover vulnerable subdomain")
 
 	flag.Parse()
 
@@ -55,6 +61,10 @@ func main() {
 	subjack.Process(&o)
 
 	copyFile(file.Name(), finalOutput)
+
+	if autoTakeover {
+		autotakeover.Takeover(finalOutput, gToken)
+	}
 }
 
 func copyFile(sourcePath, destPath string) error {
