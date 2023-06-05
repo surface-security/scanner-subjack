@@ -23,6 +23,11 @@ var (
 
 // Takeover is the single public function of the
 func Takeover(inputList, token string) {
+	if _, err := os.Stat(inputList); err != nil {
+		log.Printf("failed to load input file - might not exist: %e\n", err)
+		return
+	}
+
 	// Package-level variable assignment
 	githubToken = token
 	var (

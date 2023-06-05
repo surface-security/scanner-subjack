@@ -63,7 +63,9 @@ func main() {
 	copyFile(file.Name(), finalOutput)
 
 	if autoTakeover {
-		autotakeover.Takeover(finalOutput, gToken)
+		success := autotakeover.Takeover(finalOutput, gToken)
+		if success {
+			log.Printf("successfully took over 
 	}
 }
 
